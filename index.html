@@ -152,6 +152,20 @@
             color: #000000;
             text-decoration: underline;
         }
+        .modal-content .thank-you {
+            display: none;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .modal-content .thank-you.active {
+            display: block;
+        }
+        .modal-content .form-content.active {
+            display: block;
+        }
+        .modal-content .form-content {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -169,22 +183,31 @@
     <div id="contactModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">×</span>
-            <h2>Свяжитесь с нами</h2>
-            <p>Задайте свой вопрос и укажите адрес электронной почты для связи</p>
-            <form action="https://formspree.io/f/mldbkkwa" method="POST">
-                <input type="text" name="name" placeholder="Как к вам обращаться" required>
-                <input type="email" name="email" placeholder="Email для обратной связи" required>
-                <textarea name="message" placeholder="Ваш вопрос и тема обращения" required></textarea>
-                <input type="hidden" name="_to" value="maksgalanov@yandex.ru">
-                <button type="submit">Отправить</button>
-                <p>Отправляя форму, вы даете согласие на обработку персональных данных и соглашаетесь c <a href="/privacy.html">политикой конфиденциальности</a></p>
-            </form>
+            <div class="form-content active">
+                <h2>Свяжитесь с нами</h2>
+                <p>Задайте свой вопрос и укажите адрес электронной почты для связи</p>
+                <form id="contactForm" action="https://formspree.io/f/mldbkkwa" method="POST">
+                    <input type="text" name="name" placeholder="Как к вам обращаться" required>
+                    <input type="email" name="email" placeholder="Email для обратной связи" required>
+                    <textarea name="message" placeholder="Ваш вопрос и тема обращения" required></textarea>
+                    <input type="hidden" name="_to" value="maksgalanov@yandex.ru">
+                    <button type="submit">Отправить</button>
+                    <p>Отправляя форму, вы даете согласие на обработку персональных данных и соглашаетесь c <a href="/privacy.html">политикой конфиденциальности</a></p>
+                </form>
+            </div>
+            <div class="thank-you">
+                <h2>Спасибо за ваш запрос!</h2>
+                <p>Мы свяжемся с вами в ближайшее время.</p>
+            </div>
         </div>
     </div>
 
     <script>
         function openModal() {
             document.getElementById('contactModal').style.display = 'flex';
+            document.querySelector('.form-content').classList.add('active');
+            document.querySelector('.thank-you').classList.remove('active');
+            document.getElementById('contactForm').reset();
         }
 
         function closeModal() {
@@ -196,6 +219,34 @@
                 closeModal();
             }
         }
+
+        // Handle form submission with AJAX
+        document.getElementById('contactForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show thank-you message
+                    document.querySelector('.form-content').classList.remove('active');
+                    document.querySelector('.thank-you').classList.add('active');
+                } else {
+                    alert('Произошла ошибка при отправке формы. Пожалуйста, попробуйте снова.');
+                }
+            })
+            .catch(error => {
+                alert('Произошла ошибка: ' + error.message);
+            });
+        });
     </script>
 </body>
 </html>
